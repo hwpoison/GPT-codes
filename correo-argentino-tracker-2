@@ -1,0 +1,33 @@
+import requests
+import hashlib
+import time
+from win10toast import ToastNotifier
+
+# URL de la página web que quieres monitorear
+url = 'https://www.correoargentino.com.ar/empresas/tyt/service.php?cliente=XXXXXXXXXXXXXXXXXXX'
+
+# Intervalo de tiempo en segundos para chequear la página
+interval = 60
+
+# Inicializar el notificador
+toaster = ToastNotifier()
+toaster.show_toast("Script iniciado", duration=10)
+# Obtener el hash del contenido de la página
+def get_page_hash(url):
+    response = requests.get(url)
+    page_content = response.text
+    return hashlib.sha256(page_content.encode('utf-8')).hexdigest()
+
+# Hash inicial de la página
+initial_hash = get_page_hash(url)
+
+while True:
+    time.sleep(interval)
+    current_hash = get_page_hash(url)
+    
+    if current_hash != initial_hash:
+        toaster.show_toast("Notificación", "La página ha sido modificada.", duration=10)
+        initial_hash = current_hash
+        print("Se ha detectado una modificación.")
+    else:
+        print("No modificado.")
